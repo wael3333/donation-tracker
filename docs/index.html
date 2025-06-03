@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>حملة واعتصموا بحبل الله</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+      text-align: center;
+      padding: 30px;
+    }
+    .progress-container {
+      width: 80%;
+      background-color: #ddd;
+      border-radius: 20px;
+      margin: 20px auto;
+      height: 40px;
+    }
+    .progress-bar {
+      height: 100%;
+      background-color: #4CAF50;
+      border-radius: 20px;
+      width: 0%;
+      transition: width 0.5s;
+    }
+    input[type="number"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 150px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+    }
+    .amount-display {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    .status-message {
+      margin-top: 10px;
+      font-size: 16px;
+      color: red;
+    }
+    .logo {
+      width: 150px;
+      margin-bottom: 15px;
+    }
+    .ayah-box {
+      font-size: 25px;
+      margin-bottom: 20px;
+      font-weight: bold;
+      color: #333;
+      min-height: 24px;
+    }
+    .live-icon {
+      position: fixed;
+      left: 10px;
+      top: 10px;
+      background-color: red;
+      color: white;
+      padding: 5px 10px;
+      font-weight: bold;
+      border-radius: 5px;
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 60%;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <div class="live-icon">LIVE</div>
+  <img src="Untitled_design_7.png" alt="شعار المسجد" class="logo">
+  <div class="ayah-box" id="ayah-box"></div>
+  <h1 style="color: #4CAF50;text-decoration: underline;">الحملة الأولى : واعتصموا بحبل الله</h1>
+  <div class="progress-container">
+    <div id="progress-bar" class="progress-bar"></div>
+  </div>
+  <div class="amount-display">
+    تم جمع: <span id="collected">0</span> من 250000 يورو
+  </div>
+  <div>
+    <input type="number" id="donation" placeholder="أدخل المبلغ" />
+    <button onclick="addDonation()">إضافة</button>
+    <div class="status-message" id="status-message"></div>
+  </div>
+  <audio id="successSound" src="Takbier.mp3" preload="auto"></audio>
+  <table>
+    <thead><tr><th>المبلغ</th><th>التاريخ والوقت</th></tr></thead>
+    <tbody id="log-body"></tbody>
+  </table>
+  <script>
+    const airtableApiKey = "patADy13MdsucLHJR.f26794c411f418f0eb6da0ae1c79819b843c2edb1143ad07f66c9b953d6c2c9a";
+    const baseId = "appFr3seko6dEOI76";
+    const tableName = "Spenden";
+    let collected = 0;
+    let total = 250000;
+    let ayat = [
+      "﴿ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُم بِٱللَّيْلِ وَٱلنَّهَارِ سِرًّا وَعَلَانِيَةً فَلَهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ﴾",
+      "﴿وَمَا تُنفِقُوا۟ مِنْ خَيْرٍۢ فَإِنَّ ٱللَّهَ بِهِۦ عَلِيمٌ﴾",
+      "﴿قُلْ إِنَّ رَبِّي يَبْسُطُ ٱلرِّزْقَ لِمَن يَشَآءُ مِنْ عِبَادِهِۦ وَيَقْدِرُ لَهُۥ ۚ وَمَآ أَنفَقْتُم مِّن شَيْءٍ فَهُوَ يُخْلِفُهُۥ﴾",
+      "﴿لَن تَنَالُوا۟ ٱلْبِرَّ حَتَّىٰ تُنفِقُوا۟ مِمَّا تُحِبُّونَ﴾",
+      " قال رسول الله ﷺ: «الصدقة تطفئ الخطيئة كما يطفئ الماء النار»",
+      "قال رسول الله ﷺ: «اتقوا النار ولو بشق تمرة»"
+    ];
+
+    function rotateAyat() {
+      const ayahBox = document.getElementById('ayah-box');
+      let index = 0;
+      ayahBox.innerText = ayat[index];
+      setInterval(() => {
+        index = (index + 1) % ayat.length;
+        ayahBox.innerText = ayat[index];
+      }, 10000);
+    }
+
+    function updateProgress() {
+      let percent = (collected / total) * 100;
+      document.getElementById("progress-bar").style.width = percent + "%";
+      document.getElementById("collected").innerText = collected.toLocaleString();
+    }
+
+    function fetchTotalFromAirtable() {
+      fetch(`https://api.airtable.com/v0/${baseId}/${tableName}?pageSize=100&sort%5B0%5D%5Bfield%5D=timestamp&sort%5B0%5D%5Bdirection%5D=desc`, {
+        headers: {
+          Authorization: `Bearer ${airtableApiKey}`
+        }
+      })
+      .then(res => res.json())
+      .then(data => {
+        let sum = 0;
+        const logBody = document.getElementById("log-body");
+        logBody.innerHTML = "";
+        data.records.forEach((r, i) => {
+          if (r.fields.amount) sum += r.fields.amount;
+          if (i < 10) {
+            const row = `<tr><td>${r.fields.amount}</td><td>${new Date(r.fields.timestamp).toLocaleString('en')}</td></tr>`;
+            logBody.insertAdjacentHTML("beforeend", row);
+          }
+        });
+        collected = sum;
+        updateProgress();
+      })
+      .catch(err => {
+        console.error("فشل في قراءة مجموع التبرعات", err);
+      });
+    }
+
+    function sendToAirtable(amount) {
+      const timestamp = new Date().toISOString();
+      return fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${airtableApiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          records: [
+            {
+              fields: {
+                amount: amount,
+                timestamp: timestamp
+              }
+            }
+          ]
+        })
+      });
+    }
+
+    function addDonation() {
+      const amount = parseFloat(document.getElementById("donation").value);
+      const statusBox = document.getElementById("status-message");
+      if (!isNaN(amount) && amount > 0) {
+        sendToAirtable(amount)
+        .then(res => res.json())
+        .then(data => {
+          if (data.records) {
+            const audio = document.getElementById("successSound");
+            if (audio) audio.play().catch(e => console.log("الصوت يحتاج تفاعل المستخدم", e));
+            statusBox.style.color = "green";
+            statusBox.innerText = "✔ تم الحفظ في قاعدة البيانات";
+            document.getElementById("donation").value = "";
+            fetchTotalFromAirtable();
+          } else {
+            throw new Error("Airtable رفض الطلب");
+          }
+        })
+        .catch(err => {
+          console.error(err);
+          statusBox.style.color = "red";
+          statusBox.innerText = "❌ فشل في إرسال التبرع إلى Airtable";
+        });
+      }
+    }
+
+    fetchTotalFromAirtable();
+    rotateAyat();
+  </script>
+</body>
+</html>
