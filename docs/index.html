@@ -179,8 +179,13 @@
         })
       });
     }
+ function addDonation() {
+      const password = prompt("الرجاء إدخال كلمة السر:");
+      if (password !== "ahmed") {
+        alert("كلمة السر غير صحيحة ❌");
+        return;
+      }
 
-    function addDonation() {
       const amount = parseFloat(document.getElementById("donation").value);
       const statusBox = document.getElementById("status-message");
       if (!isNaN(amount) && amount > 0) {
