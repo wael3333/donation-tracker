@@ -147,7 +147,7 @@
       <thead>
         <tr>
           <th>المبلغ اليومي<br>Tagessumme (€)</th>
-          <th>التاريخ والوقت<br>Datum & Zeit</th>
+          <th>التاريخ <br>Datum </th>
         </tr>
       </thead>
       <tbody id="log-body"></tbody>
@@ -167,7 +167,6 @@
     let ayat = [
       "﴿ٱلَّذِينَ يُنفِقُونَ أَمْوَٰلَهُم بِٱللَّيْلِ وَٱلنَّهَارِ سِرًّا وَعَلَانِيَةً فَلَهُمْ أَجْرُهُمْ عِندَ رَبِّهِمْ﴾",
       "﴿وَمَا تُنفِقُوا۟ مِنْ خَيْرٍۢ فَإِنَّ ٱللَّهَ بِهِۦ عَلِيمٌ﴾",
-      "﴿قُلْ إِنَّ رَبِّي يَبْسُطُ ٱلرِّزْقَ لِمَن يَشَآءُ مِنْ عِبَادِهِۦ وَيَقْدِرُ لَهُۥ ۚ وَمَآ أَنفَقْتُم مِّن شَيْءٍ فَهُوَ يُخْلِفُهُۥ﴾",
       "﴿لَن تَنَالُوا۟ ٱلْبِرَّ حَتَّىٰ تُنفِقُوا۟ مِمَّا تُحِبُّونَ﴾",
       " قال رسول الله ﷺ: «الصدقة تطفئ الخطيئة كما يطفئ الماء النار»",
       "قال رسول الله ﷺ: «اتقوا النار ولو بشق تمرة»"
@@ -208,7 +207,7 @@
           if (i === 0) {
             const row = `<tr>
                            <td>${r.fields.amount}</td>
-                           <td>${new Date(r.fields.timestamp).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}</td>
+                           <td>${new Date(r.fields.timestamp).toLocaleString('de-DE', { dateStyle: 'short' })}</td>
                          </tr>`;
             logBody.insertAdjacentHTML("beforeend", row);
           }
